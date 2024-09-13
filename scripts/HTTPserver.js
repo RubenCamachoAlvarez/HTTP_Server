@@ -2,6 +2,7 @@ import * as clientConnections from "./ClientConnections.js";
 import * as serverRouter from "./ServerRouter.js";
 import * as http from "node:http";
 import * as serverActions from "./DefaultServerActions.js";
+import * as serverFileSystem from "./ServerFileSystem.js";
 
 export class HTTPServer extends http.Server {
 
@@ -19,7 +20,11 @@ export class HTTPServer extends http.Server {
 
 			this.#connections.newClient(remoteAddress, remotePort);
 
+			this.#connections.getTCPconnectionInformation(remoteAddress, remotePort).startTimestamp = Date.now();
+
 			socket.on("close", () => {
+
+				this.#connections.getTCPconnectionInformation(remoteAddress, remotePort).endTimestamp = Date.now();
 
 				this.#connections.removeClient(remoteAddress, remotePort);
 
@@ -29,15 +34,23 @@ export class HTTPServer extends http.Server {
 
 		this.on("request", (request, response) => {
 
-			const TID = this.#connections.newHTTPtransaction(request, response);
+			const {remoteAddress, remotePort} = request.socket;
+		
+			const CID = this.#connections.getClientID(remoteAddress, remotePort);
 
-				this.#connections.getTransaction(TID).start = Date.now();
+			const TID = this.#connections.newHTTPtransaction(request, response, CID);
 
-				this.#handleHTTPtransaction(TID);
+			this.#connections.getTransaction(TID).start = Date.now();
+
+			this.#logHTTPevent(TID, "request");
+
+			this.#handleHTTPtransaction(TID);
 
 			response.on("finish", () => {
-
+				
 				this.#connections.getTransaction(TID).end = Date.now();
+
+				this.#logHTTPevent(TID, "response");
 
 				this.#connections.removeHTTPtransaction(TID);
 
@@ -120,6 +133,78 @@ export class HTTPServer extends http.Server {
 
 	}
 
+
+	#logHTTPevent(HTTPtransactionID, HTTPeventName) {
+
+		if(HTTPeventName === "request" || HTTPeventName === "response"){
+
+			const transaction = this.#connections.getTransaction(HTTPtransactionID);
+
+			const TCPconnectionID = transaction.CID;
+
+			const startTimestamp = transaction.start;
+
+			const serverFilePath = process.env.TRANSACTIONS_LOG;
+
+			const request = transaction.request;
+
+			const method = request.method;
+
+			const path = request.url;
+
+			let message = "";
+
+			if(HTTPeventName === "request") {
+
+				message = `Request TCP_connection_ID=${TCPconnectionID} HTTP_transaction_ID=${HTTPtransactionID} ${method} ${path} start_UTC=${new Date(startTimestamp).toUTCString()}\n`;
+
+			}else if(HTTPeventName === "response") {
+
+				const response = transaction.response;
+
+				const endTimestamp = transaction.end;
+
+				message = `Response TCP_connetion_ID=${TCPconnectionID} HTTP_transaction_ID=${HTTPtransactionID} ${method} ${path} status_code=${response.statusCode} Duration=${endTimestamp-startTimestamp}ms end_UTC=${new Date(endTimestamp).toUTCString()}\n`;
+
+			}
+
+			(async () => {
+
+
+				serverFileSystem.appendFile(serverFilePath, message);
+
+			})();
+
+
+		}
+
+
+	}
+
+
+	#logTCPevent(address, port, TCPevent) {
+
+		if(TCPevent === "connection" ||  TCPevent === "disconnection"){
+
+			const connectionInformation = this.#connections.getTCPconnectionInformation(address, port);
+
+			let message = "";
+
+			if(TCPevent === "connection") {
+
+
+				message = `Connection established from ${address}:${port} TCP_connection_id=${connectionInformation.CID} start_UTC=${connectionInformation.startTimestamp}`;
+
+
+			}else if(TCPevent === "disconnection") {
+
+
+
+			}
+
+		}
+
+	}
 		
 
 

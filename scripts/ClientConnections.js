@@ -7,7 +7,7 @@ function generateTCPconnectionID() {
 
 function generateHTTPtransactionID() {
 
-	return Math.ceil(Math.random * Date.now()).toString(16);
+	return Math.ceil(Math.random() * Date.now()).toString(16);
 
 }
 
@@ -38,7 +38,9 @@ export class ClientConnections {
 
 				"CID" : CID,
 
-				"timestamp" : Date.now()
+				"startTimestamp" : null,
+
+				"endTimestamp" : null,
 
 			};
 	
@@ -49,7 +51,7 @@ export class ClientConnections {
 	}
 
 
-	isClientConnect(address, port) {
+	isClientConnected(address, port) {
 
 		if(this.#clients[address] !== undefined && this.#clients[address][port] !== undefined) {
 
@@ -67,7 +69,7 @@ export class ClientConnections {
 
 			delete this.#clients[address][port];
 
-			if(this.#clients[address].length === 0) {
+			if(Object.keys(this.#clients[address]).length === 0) {
 
 				delete this.#clients[address];
 
@@ -78,12 +80,34 @@ export class ClientConnections {
 
 	}
 
+	getClientID(address, port) {
 
-	newHTTPtransaction(request, response) {
+		if(this.isClientConnected(address, port)){
+
+			return this.#clients[address][port].CID;
+
+		}
+
+	}
+
+	getTCPconnectionInformation(address, port) {
+
+		if(this.isClientConnected(address, port)) {
+
+			return this.#clients[address][port];	
+
+		}
+
+	}
+
+
+	newHTTPtransaction(request, response, TCPconnectionID) {
 
 		const transactionID = generateHTTPtransactionID();
 
 		this.#transactions[transactionID] = {
+
+			"CID" : TCPconnectionID,
 
 			"request" : request,
 
@@ -112,6 +136,26 @@ export class ClientConnections {
 	getTransaction(transactionID) {
 
 		return this.#transactions[transactionID];
+
+	}
+
+	printClients() {
+
+		console.log("Clients");
+
+		console.log(this.#clients);
+
+		console.log("---------------------------");
+
+	}
+
+	printTransactions() {
+
+		console.log("Transactions");
+
+		console.log(this.#transactions);
+
+		console.log("___________________________");
 
 	}
 
