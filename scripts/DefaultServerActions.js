@@ -1,5 +1,6 @@
 import * as mimeTypes from "mime-types";
 import * as serverFileSystem from "./ServerFileSystem.js";
+import * as http from "node:http";
 
 export async function GETstaticResource(pathResource, response) {
 
@@ -24,5 +25,52 @@ export async function GETstaticResource(pathResource, response) {
 		response.end("Generic server error");
 
 	}	
+
+}
+
+
+
+export async function getIPaddressInformation(address) {
+
+	const url = `http://ip-api.com/json/${address}?fields=country,continent`;
+
+	return new Promise((resolve, reject) => {
+
+		http.get(url, (response) => {
+
+			let data = "";
+
+			response.on("data", (chunk) => {
+
+
+				data += chunk;
+
+			});
+
+			response.on("end", () => {
+
+				try {
+
+					const result = JSON.parse(data);
+
+					resolve(result);
+
+				}catch(error) {
+
+					reject(error);
+
+				}
+
+			});
+
+
+		}).on("error", (err) => {
+
+			reject(error);
+
+		});
+
+	});
+
 
 }

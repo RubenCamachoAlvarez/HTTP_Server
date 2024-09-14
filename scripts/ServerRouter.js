@@ -21,17 +21,21 @@ export class ServerRouter {
 
 	#addResource(path, resource, methodName) {
 
-		if((methodName === "GET" && typeof resource === "string") || (methodName === "POST" && (typeof resource === "string" || (typeof resource === "function" && resource.length === 2))))
+		if((typeof path === "string" || path instanceof String) &&(methodName === "GET" || method === "POST") && ((typeof resource === "string" || resource instanceof String) || (typeof resource === "function" && resource.length === 2))) {
 
-		if(this.#paths[path] === undefined)
+		if(this.#paths[path] === undefined) {
 
 			this.#paths[path] = {};
+
+		}
 
 		const methods = this.#paths[path];
 
 		methods[methodName] = resource;
 
 	}
+
+}
 
 
 	getResource(path, methodName) {
