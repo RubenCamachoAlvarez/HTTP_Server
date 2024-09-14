@@ -17,6 +17,8 @@ export async function GETstaticResource(pathResource, response) {
 
 	}catch(error) {
 
+		console.log(error.message);
+
 		response.writeHead(500, {"Content-Type" : "text/plain", "Connection" : "close"});
 
 		response.end("Generic server error");

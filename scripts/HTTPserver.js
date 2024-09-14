@@ -22,9 +22,13 @@ export class HTTPServer extends http.Server {
 
 			this.#connections.getTCPconnectionInformation(remoteAddress, remotePort).startTimestamp = Date.now();
 
+			this.#logTCPevent(remoteAddress, remotePort, "connection");
+
 			socket.on("close", () => {
 
 				this.#connections.getTCPconnectionInformation(remoteAddress, remotePort).endTimestamp = Date.now();
+
+				this.#logTCPevent(remoteAddress, remotePort, "disconnection");
 
 				this.#connections.removeClient(remoteAddress, remotePort);
 
@@ -156,7 +160,9 @@ export class HTTPServer extends http.Server {
 
 			if(HTTPeventName === "request") {
 
-				message = `Request TCP_connection_ID=${TCPconnectionID} HTTP_transaction_ID=${HTTPtransactionID} ${method} ${path} start_UTC=${new Date(startTimestamp).toUTCString()}\n`;
+				const userAgent = request.headers["user-agent"];
+
+				message = `Request TCP_connection_ID=${TCPconnectionID} HTTP_transaction_ID=${HTTPtransactionID} ${method} ${path} user-agent=${userAgent} start_UTC=${new Date(startTimestamp).toUTCString()}\n`;
 
 			}else if(HTTPeventName === "response") {
 
@@ -171,7 +177,7 @@ export class HTTPServer extends http.Server {
 			(async () => {
 
 
-				serverFileSystem.appendFile(serverFilePath, message);
+				await serverFileSystem.appendFile(serverFilePath, message);
 
 			})();
 
@@ -186,6 +192,8 @@ export class HTTPServer extends http.Server {
 
 		if(TCPevent === "connection" ||  TCPevent === "disconnection"){
 
+			const filePath = process.env.CONNECTIONS_LOG;
+
 			const connectionInformation = this.#connections.getTCPconnectionInformation(address, port);
 
 			let message = "";
@@ -193,14 +201,20 @@ export class HTTPServer extends http.Server {
 			if(TCPevent === "connection") {
 
 
-				message = `Connection established from ${address}:${port} TCP_connection_id=${connectionInformation.CID} start_UTC=${connectionInformation.startTimestamp}`;
+				message = `Connection established from ${address}:${port} TCP_connection_ID=${connectionInformation.CID} start_UTC=${new Date(connectionInformation.startTimestamp).toUTCString()}\n`;
 
 
 			}else if(TCPevent === "disconnection") {
 
-
+				message = `Connection closed with ${address}:${port} TCP_connection_ID=${connectionInformation.CID} duration=${connectionInformation.endTimestamp - connectionInformation.startTimestamp}ms end_UTC=${new Date(connectionInformation.endTimestamp).toUTCString()}\n`;
 
 			}
+
+			(async () => {
+
+				await serverFileSystem.appendFile(filePath, message);
+
+			})();
 
 		}
 
