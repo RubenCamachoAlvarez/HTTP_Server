@@ -5,12 +5,76 @@ import * as uaParser from "ua-parser-js";
 const host = process.env.HOST;
 const port = process.env.PORT;
 
-
 const service = new server.HTTPServer();
 
-service.router.GET("/", "views/index.html");
+service.router.GET("/", async (req, res) => {
+
+	try {
+
+		const {remoteAddress} = req.socket;
+
+		const IPinformation = await serverActions.getIPaddressInformation(remoteAddress);
+	
+		let newResourcePath = "";
+
+		console.log("IP information:", IPinformation);
+
+		switch(IPinformation.continent) {
+
+			case "North America":
+
+				newResourcePath = "/NorthAmerica";	
+
+				break;
+
+			case "South America":
+
+
+				break;
+
+			case "Asia":
+
+
+				break;
+
+			case "Africa":
+
+
+				break;
+
+			default: //Oceania
+
+
+				break;
+
+		}
+
+
+		console.log("New location: ", newResourcePath);
+
+		res.writeHead(307, {"Location": newResourcePath});
+
+		res.end();
+
+
+	}catch(error) {
+
+		console.log(error.message);
+
+		res.writeHead(500, {"Content-Type": "text/plain", "Connection" : "close"});
+
+		res.end("Bad request");
+
+	}
+
+
+});
+
+service.router.GET("/index", "views/index.html");
 
 service.router.GET("/NorthAmerica", "views/continents/NorthAmerica.html");
+
+service.router.GET("/SouthAmerica", "views/continents/SouthAmerica.html");
 
 service.router.GET("/Descubre_mas", (req, res) => {
 
@@ -22,6 +86,12 @@ service.router.GET("/Descubre_mas", (req, res) => {
 
 
 		console.log("Client device is a hand device");
+
+		(async () => {
+		
+			serverActions.GETstaticResource("views/viajes/Viajes.html", res);
+
+		})();
 
 	}else{
 
