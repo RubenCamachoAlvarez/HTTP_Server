@@ -29,6 +29,37 @@ export async function GETstaticResource(pathResource, response) {
 }
 
 
+export async function sendStaticResourceToServer(resourcePath, response, clientFileName) {
+
+	try {
+
+		const data = await serverFileSystem.readServerFile(resourcePath);
+
+		const type = mimeTypes.lookup(resourcePath);
+
+		response.writeHead(200, {"Content-Disposition" : `attachment; filename=${clientFileName}`, "Content-Type" : type, "Connection" : "keep-alive"});
+
+		response.write(data);
+
+		response.end();
+
+
+	}catch(error) {
+
+		console.error(error.message);
+
+		response.writeHead(500, {"Content-Type" : "text/plain", "Connection" : "close"});
+
+		response.write("Generic Server Error");
+
+		response.end();
+
+
+	}
+
+}
+
+
 
 export async function getIPaddressInformation(address) {
 

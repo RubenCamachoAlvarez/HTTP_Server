@@ -28,13 +28,17 @@ service.router.GET("/Descubre_mas", (req, res) => {
 		//If the client device is a desktop (in most cases).
 		
 		console.log("Client device is a desktop");
+
+		(async () => {
+
+			serverActions.sendStaticResourceToServer("files/Comunicado.txt", res, "ComunicadoAdministracion.txt");
+
+			console.log("Se termino de ejecutar mi estimado");
+
+		})();
 	
 
 	}
-
-	res.writeHead(200, {"Content-Type" : "application/json", "Connection" : "close"});
-
-	res.end(JSON.stringify(clientUserAgent.getResult()));
 
 });
 
