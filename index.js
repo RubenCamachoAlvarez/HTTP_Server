@@ -82,7 +82,9 @@ service.router.GET("/NorthAmerica", "views/continents/NorthAmerica.html");
 
 service.router.GET("/SouthAmerica", "views/continents/SouthAmerica.html");
 
-service.router.GET("/Descubre_mas", (req, res) => {
+service.router.GET("/Asia", "views/continents/Asia.html");
+
+service.router.GET("/Travels", (req, res) => {
 
 	const clientUserAgent = new uaParser.UAParser(req.headers["user-agent"]);
 
@@ -95,7 +97,7 @@ service.router.GET("/Descubre_mas", (req, res) => {
 
 		(async () => {
 		
-			serverActions.GETstaticResource("views/viajes/Viajes.html", res);
+			serverActions.GETstaticResource("views/travels/Travels.html", res);
 
 		})();
 
@@ -107,9 +109,7 @@ service.router.GET("/Descubre_mas", (req, res) => {
 
 		(async () => {
 
-			serverActions.sendStaticResourceToServer("files/Comunicado.txt", res, "ComunicadoAdministracion.txt");
-
-			console.log("Se termino de ejecutar mi estimado");
+			serverActions.sendStaticResourceToServer("files/DesktopMessage.txt", res, "ComunicadoAdministracion.txt");
 
 		})();
 	
