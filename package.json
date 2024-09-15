@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "service" : "nodemon --env-file=.env index.js"
+    "service": "nodemon --env-file=.env index.js"
   },
   "author": "",
   "license": "ISC",
@@ -13,6 +13,7 @@
     "nodemon": "^3.1.4"
   },
   "dependencies": {
-    "mime-types": "^2.1.35"
+    "mime-types": "^2.1.35",
+    "ua-parser-js": "^1.0.39"
   }
 }

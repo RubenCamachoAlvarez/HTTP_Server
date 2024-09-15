@@ -1,5 +1,6 @@
 import * as server from "./scripts/HTTPserver.js";
 import * as serverActions from "./scripts/DefaultServerActions.js";
+import * as uaParser from "ua-parser-js";
 
 const host = process.env.HOST;
 const port = process.env.PORT;
@@ -9,7 +10,35 @@ const service = new server.HTTPServer();
 
 service.router.GET("/", "views/index.html");
 
-service.router.GET("/resource1/", (req, res) => {
+service.router.GET("/NorthAmerica", "views/continents/NorthAmerica.html");
+
+service.router.GET("/Descubre_mas", (req, res) => {
+
+	const clientUserAgent = new uaParser.UAParser(req.headers["user-agent"]);
+
+	if(["mobile", "tablet"].includes(clientUserAgent.getDevice().type)) {
+
+		//If the client device is a mobile or tablet
+
+
+		console.log("Client device is a hand device");
+
+	}else{
+
+		//If the client device is a desktop (in most cases).
+		
+		console.log("Client device is a desktop");
+	
+
+	}
+
+	res.writeHead(200, {"Content-Type" : "application/json", "Connection" : "close"});
+
+	res.end(JSON.stringify(clientUserAgent.getResult()));
+
+});
+
+service.router.GET("/resource1", (req, res) => {
 
 	const {remoteAddress} = req.socket;
 
