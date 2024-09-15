@@ -30,20 +30,27 @@ service.router.GET("/", async (req, res) => {
 			case "South America":
 
 
+				newResourcePath = "/SouthAmerica";
+
 				break;
 
 			case "Asia":
+
+				newResourcePath = "/Asia";
 
 
 				break;
 
 			case "Africa":
 
+				newResourcePath = "/Africa";
+
 
 				break;
 
 			default: //Oceania
 
+				newResourcePath = "/Oceania";
 
 				break;
 
@@ -55,7 +62,6 @@ service.router.GET("/", async (req, res) => {
 		res.writeHead(307, {"Location": newResourcePath});
 
 		res.end();
-
 
 	}catch(error) {
 
