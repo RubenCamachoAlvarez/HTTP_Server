@@ -1,3 +1,4 @@
+import * as serverActions from "./DefaultServerActions.js";
 
 function generateTCPconnectionID() {
 
@@ -20,21 +21,29 @@ export class ClientConnections {
 
 	constructor() {}
 
-	newClient(address, port) {
+	async newClient(address, port) {
 
 		let CID = null;
 
 		if(this.#clients[address] === undefined ){
 
-			this.#clients[address] = {};
+			const IPinformation = await serverActions.getIPaddressInformation(address);;
+
+			this.#clients[address] = {
+
+				IPinformation : IPinformation,
+
+				connections : {}
+
+			};
 		
 		}
 
-		if(this.#clients[address][port] === undefined) {
+		if(this.#clients[address].connections[port] === undefined) {
 
 			CID = generateTCPconnectionID();
 
-			this.#clients[address][port] = {
+			this.#clients[address].connections[port] = {
 
 				"CID" : CID,
 
@@ -53,7 +62,7 @@ export class ClientConnections {
 
 	isClientConnected(address, port) {
 
-		if(this.#clients[address] !== undefined && this.#clients[address][port] !== undefined) {
+		if(this.#clients[address] !== undefined && this.#clients[address].connections[port] !== undefined) {
 
 			return true;
 	
@@ -65,11 +74,11 @@ export class ClientConnections {
 
 	removeClient(address, port) {
 
-		if(this.#clients[address][port] !== undefined) {
+		if(this.#clients[address] !== undefined && this.#clients[address].connections[port] !== undefined) {
 
-			delete this.#clients[address][port];
+			delete this.#clients[address].connections[port];
 
-			if(Object.keys(this.#clients[address]).length === 0) {
+			if(Object.keys(this.#clients[address].connections).length === 0) {
 
 				delete this.#clients[address];
 
@@ -84,7 +93,7 @@ export class ClientConnections {
 
 		if(this.isClientConnected(address, port)){
 
-			return this.#clients[address][port].CID;
+			return this.#clients[address].connections[port].CID;
 
 		}
 
@@ -94,7 +103,17 @@ export class ClientConnections {
 
 		if(this.isClientConnected(address, port)) {
 
-			return this.#clients[address][port];	
+			return this.#clients[address].connections[port];	
+
+		}
+
+	}
+
+	getIPclientInformation(address) {
+
+		if(this.#clients[address] !== undefined) {
+
+			return this.#clients[address].IPinformation;
 
 		}
 

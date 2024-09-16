@@ -14,17 +14,17 @@ export class HTTPServer extends http.Server {
 
 		super();
 
-		this.on("connection", (socket) => {
+		this.on("request", async (request, response) => {
 
-			const {remoteAddress, remotePort} = socket;
+			const {remoteAddress, remotePort} = request.socket;
 
-			this.#connections.newClient(remoteAddress, remotePort);
+			const connectionID = await this.#connections.newClient(remoteAddress, remotePort);
 
 			this.#connections.getTCPconnectionInformation(remoteAddress, remotePort).startTimestamp = Date.now();
 
 			this.#logTCPevent(remoteAddress, remotePort, "connection");
 
-			socket.on("close", () => {
+			request.socket.on("close", () => {
 
 				this.#connections.getTCPconnectionInformation(remoteAddress, remotePort).endTimestamp = Date.now();
 
@@ -33,12 +33,6 @@ export class HTTPServer extends http.Server {
 				this.#connections.removeClient(remoteAddress, remotePort);
 
 			});
-
-		});
-
-		this.on("request", (request, response) => {
-
-			const {remoteAddress, remotePort} = request.socket;
 		
 			const CID = this.#connections.getClientID(remoteAddress, remotePort);
 
@@ -115,8 +109,19 @@ export class HTTPServer extends http.Server {
 
 			}else if (typeof resource === "function" && (method === "GET" || method === "POST")) {
 
+				const transactionInformation = {
 
-				resource(request, response);
+					"request" : request,
+
+					"response" : response,
+
+					"IPinformation" : this.#connections.getIPclientInformation(request.socket.remoteAddress)
+
+				};
+
+
+				resource(transactionInformation);
+
 
 
 			}else {

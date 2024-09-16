@@ -21,7 +21,7 @@ export class ServerRouter {
 
 	#addResource(path, resource, methodName) {
 
-		if((typeof path === "string" || path instanceof String) &&(methodName === "GET" || method === "POST") && ((typeof resource === "string" || resource instanceof String) || (typeof resource === "function" && resource.length === 2))) {
+		if((typeof path === "string" || path instanceof String) &&(methodName === "GET" || method === "POST") && ((typeof resource === "string" || resource instanceof String) || (typeof resource === "function" && resource.length === 1))) {
 
 		if(this.#paths[path] === undefined) {
 

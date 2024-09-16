@@ -29,7 +29,7 @@ export async function GETstaticResource(pathResource, response) {
 }
 
 
-export async function sendStaticResourceToServer(resourcePath, response, clientFileName) {
+export async function sendStaticResourceToClient(resourcePath, response, clientFileName) {
 
 	try {
 
@@ -103,5 +103,55 @@ export async function getIPaddressInformation(address) {
 
 	});
 
+
+}
+
+export function getClientDefaultResource(IPinformation) {
+
+	let resource = "";
+
+	switch(IPinformation.continent) {
+
+		case "North America":
+			
+			resource = "/NorthAmerica";
+
+			break;
+
+		case "South America":
+
+			resource = "/SouthAmerica";
+
+			break;
+
+		case "Europe":
+
+			resource = "/Europe";
+
+			break;
+
+		case "Asia":
+
+			resource = "/Asia"
+
+			break;
+
+		case "Africa":
+
+			resource = "/Africa";
+
+			break;
+
+		default:
+
+			resourc = "/Oceania";
+
+			break;
+
+
+	}
+
+
+	return resource;
 
 }
