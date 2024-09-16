@@ -24,6 +24,7 @@ service.router.GET("/Travels", routes.travelsRequest);
 
 service.router.GET("/Prueba", "views/travels/Travels.html");
 
+service.router.GET("/robots.txt", "files/robots.txt");
 
 
 service.listen(port, host, () => {
@@ -32,3 +33,13 @@ service.listen(port, host, () => {
 
 
 });
+
+const serverClosing = () => {
+
+	process.exit(0);
+
+}
+
+process.on("SIGINT", serverClosing);
+
+process.on("SIGTERM", serverClosing);

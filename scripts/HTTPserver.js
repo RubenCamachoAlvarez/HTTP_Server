@@ -16,43 +16,9 @@ export class HTTPServer extends http.Server {
 
 		this.on("request", async (request, response) => {
 
-			const {remoteAddress, remotePort} = request.socket;
+			await this.#establishTCPconnection(request.socket);
 
-			const connectionID = await this.#connections.newClient(remoteAddress, remotePort);
-
-			this.#connections.getTCPconnectionInformation(remoteAddress, remotePort).startTimestamp = Date.now();
-
-			this.#logTCPevent(remoteAddress, remotePort, "connection");
-
-			request.socket.on("close", () => {
-
-				this.#connections.getTCPconnectionInformation(remoteAddress, remotePort).endTimestamp = Date.now();
-
-				this.#logTCPevent(remoteAddress, remotePort, "disconnection");
-
-				this.#connections.removeClient(remoteAddress, remotePort);
-
-			});
-		
-			const CID = this.#connections.getClientID(remoteAddress, remotePort);
-
-			const TID = this.#connections.newHTTPtransaction(request, response, CID);
-
-			this.#connections.getTransaction(TID).start = Date.now();
-
-			this.#logHTTPevent(TID, "request");
-
-			this.#handleHTTPtransaction(TID);
-
-			response.on("finish", () => {
-				
-				this.#connections.getTransaction(TID).end = Date.now();
-
-				this.#logHTTPevent(TID, "response");
-
-				this.#connections.removeHTTPtransaction(TID);
-
-			});
+			this.#generateHTTPtransaction(request, response);
 
 		});
 
@@ -60,26 +26,68 @@ export class HTTPServer extends http.Server {
 
 	}
 
-	get router() {
+	async #establishTCPconnection(socket) {
 
-		return this.#router;
+		const {remoteAddress, remotePort} = socket;
 
-	}
+		if(!this.#connections.isClientConnected(remoteAddress, remotePort)) {
 
 
-	#handleHTTPtransaction(HTTPtransactionID) {
+			await this.#connections.newClient(remoteAddress, remotePort);
 
-		const transaction = this.#connections.getTransaction(HTTPtransactionID);
+			this.#connections.getTCPconnectionInformation(remoteAddress, remotePort).startTimestamp = Date.now();
 
-		if(transaction !== undefined) {
+			this.#logTCPevent(remoteAddress, remotePort, "connection");
 
-			
-			this.#responseHTTPtransaction(transaction);
+			socket.on("close", () => {
+
+				this.#connections.getTCPconnectionInformation(remoteAddress, remotePort).endTimestamp = Date.now();
+
+				this.#logTCPevent(remoteAddress, remotePort, "disconnection");
+
+				this.#connections.removeClient(remoteAddress, remotePort);
+
+
+			});
 
 
 		}
 
-		
+	}
+
+	#generateHTTPtransaction(request, response) {
+
+		const {remoteAddress, remotePort} = request.socket;
+
+		const CID = this.#connections.getClientID(remoteAddress, remotePort);
+
+		const TID = this.#connections.newHTTPtransaction(request, response, CID);
+
+		this.#connections.getTransaction(TID).start = Date.now();
+
+		this.#logHTTPevent(TID, "request");
+
+		response.on("finish", () => {
+
+			this.#connections.getTransaction(TID).end = Date.now();
+
+			this.#logHTTPevent(TID, "response");
+
+			this.#connections.removeHTTPtransaction(TID);
+
+
+		});
+
+		const transaction = this.#connections.getTransaction(TID);
+
+		this.#responseHTTPtransaction(transaction);
+
+
+	}
+
+	get router() {
+
+		return this.#router;
 
 	}
 
