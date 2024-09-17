@@ -1,1 +1,16 @@
-Esta es una prueba de robots.text
+User-agent: *
+Disallow: /
+Disallow: /NorthAmerica
+Disallow: /Africa
+Disallow: /Oceania
+Disallow: /Asia
+Disallow: /SouthAmerica
+Allow: /index
+Allow: /Europe
+Allow: /relleno/
+
+User-agent: Bingbot
+Allow: /NorthAmerica
+
+User-agent: Googlebot
+Allow: /Oceania

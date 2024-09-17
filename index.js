@@ -22,9 +22,17 @@ service.router.GET("/Europe", routes.europe);
 
 service.router.GET("/Travels", routes.travelsRequest);
 
+//service.router.GET("/Travels", "views/travels/Travels.html");
+
 service.router.GET("/Prueba", "views/travels/Travels.html");
 
 service.router.GET("/robots.txt", "files/robots.txt");
+
+service.router.GET("/relleno/Pagina1", "views/page1.html");
+
+service.router.GET("/relleno/Pagina2", "views/page2.html");
+
+service.router.GET("/index", "views/index.html");
 
 
 service.listen(port, host, () => {

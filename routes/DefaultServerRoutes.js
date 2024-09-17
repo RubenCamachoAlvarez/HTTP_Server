@@ -24,7 +24,7 @@ export const travelsRequest = (transaction) => {
 		(async () => {
 
 			
-			serverActions.GETstaticResource("views/travels/Travels.html");
+			serverActions.GETstaticResource("views/travels/Travels.html", response);
 
 		})();
 
@@ -86,7 +86,7 @@ export const europe = (transaction) => {
 
 export const africa = (transaction) => {
 
-	showApproapiateContent("Africa", "views/continents/Africa.html", transaction);
+	showAppropiateContent("Africa", "views/continents/Africa.html", transaction);
 
 }
 

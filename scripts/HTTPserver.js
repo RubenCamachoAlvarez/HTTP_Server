@@ -127,8 +127,13 @@ export class HTTPServer extends http.Server {
 
 				};
 
+				(async () => {
+				
+					
+					resource(transactionInformation);
 
-				resource(transactionInformation);
+
+				})();
 
 
 
